@@ -45,7 +45,7 @@
                         </td>
                     </tr>
                   @empty
-                    <tr>
+                    <tr>                                                
                         <td colspan="7" class="text-center">
                             Empty Data 
                         </td>
@@ -57,3 +57,7 @@
     </div>
 </div>
 @endsection
+
+@push('script')
+
+@endpush

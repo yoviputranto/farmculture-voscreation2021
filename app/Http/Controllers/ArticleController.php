@@ -2,7 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Article;
+use App\Http\Requests\ArticleRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Auth;
+use App\Category;
+use RealRashid\SweetAlert\Facades\Alert;
+
 
 class ArticleController extends Controller
 {
@@ -14,6 +21,11 @@ class ArticleController extends Controller
     public function index()
     {
         //
+        $articles = Article::with(['category'])->get();
+
+        return view('admin.article.index', [
+            'articles' => $articles
+        ]);
     }
 
     /**
@@ -24,6 +36,10 @@ class ArticleController extends Controller
     public function create()
     {
         //
+        $categories = Category::all();
+        return view('admin.article.create', [
+            'categories' => $categories
+        ]);
     }
 
     /**
@@ -32,9 +48,23 @@ class ArticleController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ArticleRequest $request)
     {
         //
+        $data = $request->all();
+        $data['slug'] = Str::slug($request->title);
+        $data['title'] = Str::title($request->title);
+        $data['author'] = Str::title($request->author);
+        $data['user_id'] = auth()->id();
+        $data['image'] = $request->file('image')->store(
+            'assets/gallery',
+            'public'
+        );
+
+        Article::create($data);
+
+        Alert::success('Success', 'Successfully add a new article');
+        return redirect()->route('article.index');
     }
 
     /**
@@ -57,6 +87,13 @@ class ArticleController extends Controller
     public function edit($id)
     {
         //
+        $article = Article::findorFail($id);
+        $categories = Category::all();
+
+        return view('admin.article.edit', [
+            'article' => $article,
+            'categories' => $categories
+        ]);
     }
 
     /**
@@ -66,9 +103,29 @@ class ArticleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ArticleRequest $request, $id)
     {
         //
+        $data = $request->all();
+        $data['slug'] = Str::slug($request->title);
+
+        $data['title'] = Str::title($request->title);
+        $data['author'] = Str::title($request->author);
+        $data['user_id'] = auth()->id();
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store(
+                'assets/gallery',
+                'public'
+            );
+        }
+
+
+        $article = Article::findOrFail($id);
+
+        $article->update($data);
+        Alert::success('Success', 'Successfully updated the article');
+
+        return redirect()->route('article.index');
     }
 
     /**
@@ -80,5 +137,40 @@ class ArticleController extends Controller
     public function destroy($id)
     {
         //
+        $article = Article::findOrFail($id);
+        $article->delete();
+        Alert::success('Success', 'Successfully deleted the article');
+
+        return redirect()->route('article.index');
+    }
+
+    public function showPublished()
+    {
+        $articles = Article::where('status', 'Published')->with(['category'])->get();
+
+        return view('admin.article.pubarticle', [
+            'articles' => $articles
+        ]);
+    }
+
+    public function showArchived()
+    {
+        $articles = Article::where('status', 'Archived')->with(['category'])->get();
+
+        return view('admin.article.archarticle', [
+            'articles' => $articles
+        ]);
+    }
+
+    public function search(Request $request)
+    {
+        $keyword = $request->search;
+        $articles = Article::where('title', 'like', "%" . $keyword . "%")->get();
+        $items = Category::with(['article'])->get();
+        return view('admin.article.index', [
+            'items' => $items,
+            'articles' => $articles,
+            'keyword' => $keyword
+        ]);
     }
 }

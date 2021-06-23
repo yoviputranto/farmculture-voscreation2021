@@ -1,3 +1,5 @@
+
+
 <!-- Sidebar -->
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
@@ -34,9 +36,9 @@
         <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Status Articles:</h6>
-                <a class="collapse-item" href="buttons.html">All</a>
-                <a class="collapse-item" href="buttons.html">Published</a>
-                <a class="collapse-item" href="cards.html">Archived</a>
+                <a class="collapse-item" href="{{route('article.index')}}">All</a>
+                <a class="collapse-item" href="{{route('article.published')}}">Published</a>
+                <a class="collapse-item" href="{{route('article.archived')}}">Archived</a>
             </div>
         </div>
     </li>
@@ -59,7 +61,7 @@
 
     <!-- Nav Item - Charts -->
     <li class="nav-item">
-        <a class="nav-link" href="charts.html">
+        <a class="nav-link" href="{{route('profile', Auth::user()->id)}}">
             <i class="fas fa-user"></i>
             <span>User Profile</span></a>
     </li>

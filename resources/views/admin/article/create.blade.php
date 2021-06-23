@@ -3,11 +3,15 @@
 @push('script-head')
 <!-- CSRF Token -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css">
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
 <link rel="stylesheet" href="{{ asset('vendor/file-manager/css/file-manager.css') }}">
 <script src="{{ asset('vendor/file-manager/js/file-manager.js') }}"></script>
-<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+<!--summernote-->
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+<!-- SummerNote -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.11/summernote-bs4.css" rel="stylesheet">
 @endpush
 
 @section('title', 'Create Article')
@@ -30,158 +34,139 @@
         </div>
       @endif
 
-<div class="card shadow">
-    <div class="card-body">
-        <form action="{{route('category.store')}}" method="POST">
-         @csrf
-         <div class="form-group">
-             <label for="name">Name</label>
-             {{--<input type="text" class="form-control" name="name" placeholder="Name" value="{{old('name')}}">--}}
-             <textarea name="ce" class="form-control"></textarea>
-             <textarea id="summernote-editor" name="content"></textarea>
-         </div>
-         <button type="submit" class="btn btn-primary btn-block">Submit</button>
-        </form>
-        <div class="input-group">
-          <span class="input-group-btn">
-            <a id="lfm" data-input="thumbnail" data-preview="holder" class="btn btn-primary">
-              <i class="fa fa-picture-o"></i> Choose
-            </a>
-          </span>
-          <input id="thumbnail" class="form-control" type="text" name="filepath">
+      <div class="card shadow">
+        <div class="card-body">
+            <form action="{{route('article.store')}}" method="POST" enctype="multipart/form-data">
+             @csrf
+             <div class="form-group">
+              <label for="category_id">Category</label>
+              <select name="category_id" class="form-control" required>
+                <option value="">Choose Category</option>
+                @foreach ($categories as $category)
+                <option value="{{$category->id}}">
+                  {{$category->name}}
+                </option> 
+                @endforeach
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="author">Author</label>
+              <input type="text" class="form-control" name="author" placeholder="Author" value="{{old('author')}}" required>
+           </div>
+             <div class="form-group">
+                 <label for="name">Title</label>
+                 <input type="text" class="form-control" name="title" placeholder="Title" value="{{old('title')}}" required>
+              </div>
+              <!--
+              <div class="form-group">
+                <label for="image_label">Image</label>
+                  <div class="input-group">
+                      <input type="text" id="image_label" class="form-control" name="image"
+                            aria-label="Image" aria-describedby="button-image">
+                      <div class="input-group-append">
+                          <button class="btn btn-outline-secondary" type="button" id="button-image">Select</button>
+                      </div>
+                  </div>
+              </div>
+            -->
+              <div class="form-group">
+                <label for="image">Image</label>
+                <input type="file" name="image" class="form-control" placeholder="Image">
+              </div>
+              <div class="form-group">
+                <label for="name">Body</label>
+                
+                <textarea name="body" required>{!! old('body', $body ?? '') !!}</textarea>
+                <!--
+                <textarea name="body" id="summernote" required>{!! old('body', $body ?? '') !!}</textarea>-->
+              </div>
+              <div class="form-group">
+                <label for="status">Status</label>
+                <select name="status" class="form-control" required>
+                  <option value="Published">Published</option>
+                  <option value="Archived">Archived</option>
+                </select>
+              </div>
+             <button type="submit" class="btn btn-primary btn-block">Submit</button>
+            </form>
         </div>
-        <img id="holder" style="margin-top:15px;max-height:100px;">
-
-        <div style="height: 600px;">
-          <div id="fm"></div>
-      </div>
     </div>
-</div>
 @endsection
 
 @push('script')
 
-<script src="//cdn.ckeditor.com/4.6.2/standard/ckeditor.js"></script>
 <script>
-  var options = {
-    filebrowserImageBrowseUrl: '/laravel-filemanager?type=Images',
-    filebrowserImageUploadUrl: '/laravel-filemanager/upload?type=Images&_token=',
-    filebrowserBrowseUrl: '/laravel-filemanager?type=Files',
-    filebrowserUploadUrl: '/laravel-filemanager/upload?type=Files&_token='
-  };
+  document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById('button-image').addEventListener('click', (event) => {
+      event.preventDefault();
+      window.open('/file-manager/fm-button', 'fm', 'width=1400,height=800');
+    });
+  });
+  // set file link
+  function fmSetLink($url) {
+    document.getElementById('image_label').value = $url;
+  }
 </script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-<script src="{{asset('vendor/unisharp/laravel-ckeditor/adapters/jquery.js')}}"></script>
+<script src="https://cdn.ckeditor.com/4.11.2/standard/ckeditor.js"></script>
 <script>
-$('textarea.my-editor').ckeditor(options);
+  CKEDITOR.replace( 'body', {filebrowserImageBrowseUrl: '/file-manager/ckeditor'});
 </script>
+
+
+//summernote
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+<!-- SummerNote js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.11/summernote-bs4.js"></script>
+
 <script>
-    var route_prefix = "/filemanager";
-   </script>
- 
-   <!-- CKEditor init -->
-   <script src="//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.5.11/ckeditor.js"></script>
-   <script src="//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.5.11/adapters/jquery.js"></script>
-   <script>
-     $('textarea[name=ce]').ckeditor({
-       height: 100,
-       filebrowserImageBrowseUrl: route_prefix + '?type=Images',
-       filebrowserImageUploadUrl: route_prefix + '/upload?type=Images&_token={{csrf_token()}}',
-       filebrowserBrowseUrl: route_prefix + '?type=Files',
-       filebrowserUploadUrl: route_prefix + '/upload?type=Files&_token={{csrf_token()}}'
-     });
-   </script>
- <link href="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.8/summernote.css" rel="stylesheet">
- <script src="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.8/summernote.js"></script>
- <style>
-   .popover {
-     top: auto;
-     left: auto;
-   }
- </style>
- <script>
-   $(document).ready(function(){
-
-     // Define function to open filemanager window
-     var lfm = function(options, cb) {
-       var route_prefix = (options && options.prefix) ? options.prefix : '/filemanager';
-       window.open(route_prefix + '?type=' + options.type || 'file', 'FileManager', 'width=900,height=600');
-       window.SetUrl = cb;
-     };
-
-     // Define LFM summernote button
-     var LFMButton = function(context) {
-       var ui = $.summernote.ui;
-       var button = ui.button({
-         contents: '<i class="note-icon-picture"></i> ',
-         tooltip: 'Insert image with filemanager',
-         click: function() {
-
-           lfm({type: 'image', prefix: '/filemanager'}, function(lfmItems, path) {
-             lfmItems.forEach(function (lfmItem) {
-               context.invoke('insertImage', lfmItem.url);
-             });
-           });
-
-         }
-       });
-       return button.render();
-     };
-
-     // Initialize summernote with LFM button in the popover button group
-     // Please note that you can add this button to any other button group you'd like
-     $('#summernote-editor').summernote({
-       toolbar: [
-         ['popovers', ['lfm']],
-       ],
-       buttons: {
-         lfm: LFMButton
-       }
-     })
-   });
- </script>
-  <script>{!! \File::get(base_path('vendor/unisharp/laravel-filemanager/public/js/stand-alone-button.js')) !!}</script>
-  <script>$('#lfm').filemanager('image');</script>
-  <script>
-    $('#lfm').filemanager('image', {prefix: route_prefix});
-    // $('#lfm').filemanager('file', {prefix: route_prefix});
-  </script>
-  <script>
-    var lfm = function(id, type, options) {
-      let button = document.getElementById(id);
-
-      button.addEventListener('click', function () {
-        var route_prefix = (options && options.prefix) ? options.prefix : '/filemanager';
-        var target_input = document.getElementById(button.getAttribute('data-input'));
-        var target_preview = document.getElementById(button.getAttribute('data-preview'));
-
-        window.open(route_prefix + '?type=' + options.type || 'file', 'FileManager', 'width=900,height=600');
-        window.SetUrl = function (items) {
-          var file_path = items.map(function (item) {
-            return item.url;
-          }).join(',');
-
-          // set the value of the desired input to image url
-          target_input.value = file_path;
-          target_input.dispatchEvent(new Event('change'));
-
-          // clear previous preview
-          target_preview.innerHtml = '';
-
-          // set or change the preview image src
-          items.forEach(function (item) {
-            let img = document.createElement('img')
-            img.setAttribute('style', 'height: 5rem')
-            img.setAttribute('src', item.thumb_url)
-            target_preview.appendChild(img);
-          });
-
-          // trigger change event
-          target_preview.dispatchEvent(new Event('change'));
-        };
+  $(document).ready(function(){
+    // File manager button (image icon)
+    const FMButton = function(context) {
+      const ui = $.summernote.ui;
+      const button = ui.button({
+        contents: '<i class="note-icon-picture"></i> ',
+        tooltip: 'File Manager',
+        click: function() {
+          window.open('/file-manager/summernote', 'fm', 'width=1400,height=800');
+        }
       });
+      return button.render();
     };
+    $('#summernote').summernote({
+      toolbar: [
+        // [groupName, [list of button]]
+        ['style', ['bold', 'italic', 'underline', 'clear']],
+        ['font', ['strikethrough', 'superscript', 'subscript']],
+        ['fontsize', ['fontsize']],
+        ['color', ['color']],
+        ['para', ['ul', 'ol', 'paragraph']],
+        ['height', ['height']],
+        ['fm-button', ['fm']],
+      ],
+      buttons: {
+        fm: FMButton
+      }
+    });
+  });
+  // set file link
+  function fmSetLink(url) {
+    $('#summernote').summernote('insertImage', url);
+  }
+</script>
 
-    lfm('lfm2', 'file', {prefix: route_prefix});
-  </script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById('button-image').addEventListener('click', (event) => {
+      event.preventDefault();
+      window.open('/file-manager/fm-button', 'fm', 'width=1400,height=800');
+    });
+  });
+  // set file link
+  function fmSetLink($url) {
+    document.getElementById('image_label').value = $url;
+  }
+</script>
 @endpush

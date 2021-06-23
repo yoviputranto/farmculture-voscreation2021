@@ -18,6 +18,7 @@
 
     <!-- Custom styles for this template-->
     <link href="{{asset('css/sb-admin-2.min.css')}}" rel="stylesheet">
+    <link rel="stylesheet" href="{{asset('sweetalert2/sweetalert2.min.css')}}">
     @stack('script-head')
 </head>
 
@@ -95,7 +96,12 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{{asset('js/sb-admin-2.min.js')}}"></script>
+    
+    @include('sweetalert::alert')
+
     @stack('script')
+    
+
 
 </body>
 

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CategoryRequest;
 use Illuminate\Http\Request;
 use App\Category;
 use Illuminate\Support\Str;
 use Auth;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class CategoryController extends Controller
 {
@@ -42,17 +44,14 @@ class CategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CategoryRequest $request)
     {
         //
-        $this->validate($request, [
-            'name' => 'required'
-        ]);
+        $data = $request->all();
+        $data['user_id'] = auth()->id();
 
-        Category::create([
-            'name' => $request['name'],
-            'user_id' => auth()->id()
-        ]);
+        Category::create($data);
+        Alert::success('Success', 'Successfully added new category');
 
 
         return redirect()->route('category.index');
@@ -92,18 +91,17 @@ class CategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(CategoryRequest $request, $id)
     {
         //
-        $this->validate($request, [
-            'name' => 'required'
-        ]);
 
         $data = $request->all();
+        $data['user_id'] = auth()->id();
 
         $category = Category::findorFail($id);
 
         $category->update($data);
+        Alert::success('Success', 'Successfully updated the category');
 
 
         return redirect()->route('category.index');
@@ -118,9 +116,11 @@ class CategoryController extends Controller
     public function destroy($id)
     {
         //
-        $category = Category::findOrFail($id);
-        $category->delete();
 
+        $category = Category::findOrFail($id);
+
+        $category->delete();
+        Alert::success('Success', 'Successfully deleted the category');
         return redirect()->route('category.index');
     }
 }

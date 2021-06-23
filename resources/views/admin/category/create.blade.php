@@ -26,7 +26,7 @@
          @csrf
          <div class="form-group">
              <label for="name">Name</label>
-             <input type="text" class="form-control" name="name" placeholder="Name" value="{{old('name')}}">
+             <input type="text" class="form-control" name="name" placeholder="Name" value="{{old('name')}}" required>
          </div>
          <button type="submit" class="btn btn-primary btn-block">Submit</button>
         </form>
